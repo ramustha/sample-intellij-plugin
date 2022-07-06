@@ -23,6 +23,7 @@ import com.intellij.spellchecker.tokenizer.TokenConsumer;
 import com.intellij.spellchecker.tokenizer.Tokenizer;
 import com.intellij.util.Consumer;
 import com.intellij.util.containers.CollectionFactory;
+import com.ramusthastudio.plugin.sample.settings.AppSettingsState;
 import com.ramusthastudio.plugin.sample.tokenizer.SuppressibleUnixEpochStrategy;
 import com.ramusthastudio.plugin.sample.tokenizer.UnixEpochStrategy;
 import org.apache.commons.lang.math.NumberUtils;
@@ -34,8 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import static com.ramusthastudio.plugin.sample.inspections.TimeMillisSplitter.SECONDS_LENGTH;
@@ -44,13 +43,6 @@ public class UnixEpochInspection extends LocalInspectionTool {
   private static final Logger LOG = Logger.getInstance(UnixEpochInspection.class);
   public static final String UNIX_EPOCH_SHORT_NAME = "UnixEpochInspection";
   public static final String UNIX_EPOCH_DISPLAY_NAME = "Unix epoch preview";
-
-  public static final DateTimeFormatter UTC_FORMATTER =
-      DateTimeFormatter.RFC_1123_DATE_TIME
-          .withZone(ZoneId.of("UTC"));
-  public static final DateTimeFormatter LOCAL_FORMATTER =
-      DateTimeFormatter.RFC_1123_DATE_TIME
-          .withZone(ZoneId.systemDefault());
 
   @Override
   public SuppressQuickFix @NotNull [] getBatchSuppressActions(@Nullable PsiElement element) {
@@ -91,7 +83,8 @@ public class UnixEpochInspection extends LocalInspectionTool {
   }
 
   @Override
-  public @Nls(capitalization = Nls.Capitalization.Sentence) @NotNull String getGroupDisplayName() {
+  public @Nls(capitalization = Nls.Capitalization.Sentence)
+  @NotNull String getGroupDisplayName() {
     return UNIX_EPOCH_DISPLAY_NAME;
   }
 
@@ -129,7 +122,7 @@ public class UnixEpochInspection extends LocalInspectionTool {
           return;
         }
 
-        System.out.println("element = " + element.getClass() + " " + element.getLanguage());
+        LOG.debug("element = " + element.getClass() + " " + element.getLanguage());
 
         final Language language = element.getLanguage();
         tokenize(element,
@@ -174,6 +167,7 @@ public class UnixEpochInspection extends LocalInspectionTool {
 
   private static final class MyTokenConsumer extends TokenConsumer implements Consumer<TextRange> {
     private final Set<String> myAlreadyChecked = CollectionFactory.createSmallMemoryFootprintSet();
+    private final AppSettingsState appSettingsState = AppSettingsState.getInstance();
     private final ProblemsHolder myHolder;
     private final NamesValidator myNamesValidator;
     private PsiElement myElement;
@@ -217,7 +211,8 @@ public class UnixEpochInspection extends LocalInspectionTool {
         return;
       }
 
-      System.out.println(myElement.getLanguage() + " range " + range + " word = " + word + " " + myElement.getClass());
+      LOG.debug(myElement.getLanguage() + " range " + range + " word = " + word + " "
+          + myElement.getClass());
 
       UnixEpochStrategy strategy = getUnixEpochStrategy(myElement, myElement.getLanguage());
       final Tokenizer tokenizer = strategy != null ? strategy.getTokenizer(myElement) : null;
@@ -226,7 +221,9 @@ public class UnixEpochInspection extends LocalInspectionTool {
       }
 
       Instant instant = createInstantFormat(word);
-      String localFormat = String.format("%s = %s", word, LOCAL_FORMATTER.format(instant));
+      String localFormat = String.format("%s = %s",
+          word,
+          appSettingsState.getDefaultLocalFormatter().format(instant));
       if (myHolder.isOnTheFly()) {
         addRegularDescriptor(myElement, range, myHolder, myUseRename, localFormat);
       } else {

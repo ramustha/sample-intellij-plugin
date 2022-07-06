@@ -42,6 +42,12 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="tools"
+                                 id="com.ramusthastudio.plugin.sample.settings.AppSettingsConfigurable"
+                                 instance="com.ramusthastudio.plugin.sample.settings.AppSettingsConfigurable"
+                                 displayName="Unix Epoch Time Settings"/>
+        <applicationService serviceImplementation="com.ramusthastudio.plugin.sample.settings.AppSettingsState"/>
+
         <localInspection shortName="UnixEpochInspection"
                          displayName="Unix epoch time visualize"
                          enabledByDefault="true" level="INFO"
@@ -67,7 +73,7 @@
 
     <actions>
         <action id="UnixEpochAction"
-                class="com.ramusthastudio.plugin.sample.UnixEpochAction"
+                class="com.ramusthastudio.plugin.sample.actions.UnixEpochAction"
                 text="Show Date Format"
                 description="Visualize the unix epoch time format to human-readable date format">
             <keyboard-shortcut keymap="$default" first-keystroke="control alt D"/>

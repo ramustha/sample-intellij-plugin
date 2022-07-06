@@ -1,4 +1,4 @@
-package com.ramusthastudio.plugin.sample;
+package com.ramusthastudio.plugin.sample.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -7,18 +7,16 @@ import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ui.Messages;
+import com.ramusthastudio.plugin.sample.settings.AppSettingsState;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.awt.*;
 import java.time.Instant;
 
-import static com.ramusthastudio.plugin.sample.UnixEpochInspection.LOCAL_FORMATTER;
-import static com.ramusthastudio.plugin.sample.UnixEpochInspection.UTC_FORMATTER;
 import static com.ramusthastudio.plugin.sample.UnixEpochInspection.createInstantFormat;
 
 public class UnixEpochAction extends AnAction {
+  private final AppSettingsState appSettingsState = AppSettingsState.getInstance();
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
@@ -29,12 +27,15 @@ public class UnixEpochAction extends AnAction {
 
     if (NumberUtils.isDigits(selectedText)) {
       Instant instant = createInstantFormat(selectedText);
-      String localFormat = String.format("%s", LOCAL_FORMATTER.format(instant));
-      String utcFormat = String.format("%s [UTC]", UTC_FORMATTER.format(instant));
+      String localFormat = String.format("%s = %s",
+          selectedText,
+          appSettingsState.getDefaultLocalFormatter().format(instant));
+      String utcFormat = String.format("%s = %s [UTC]",
+          selectedText,
+          appSettingsState.getDefaultUtcFormatter().format(instant));
       String message = String.format("%s%n%s", utcFormat, localFormat);
 
-      Messages.showInfoMessage(
-          e.getProject(), message, String.format("Unix Timestamp [%s]", selectedText));
+      Messages.showInfoMessage(e.getProject(), message, "Unix Timestamp");
     }
   }
 }
