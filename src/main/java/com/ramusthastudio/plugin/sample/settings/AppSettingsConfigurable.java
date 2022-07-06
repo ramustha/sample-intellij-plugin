@@ -2,6 +2,7 @@
 
 package com.ramusthastudio.plugin.sample.settings;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Nls;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class AppSettingsConfigurable implements Configurable {
+  private static final Logger LOG = Logger.getInstance(AppSettingsConfigurable.class);
 
   private AppSettingsComponent mySettingsComponent;
 
@@ -35,11 +37,16 @@ public class AppSettingsConfigurable implements Configurable {
   public boolean isModified() {
     AppSettingsState settings = AppSettingsState.getInstance();
     if (mySettingsComponent.isCustomPatternEnable()) {
-      return mySettingsComponent.isAlreadyPreview() && !mySettingsComponent.getCustomPattern()
-          .equals(settings.getCustomPattern());
+      boolean modified =
+          mySettingsComponent.isAlreadyPreview()
+              && !mySettingsComponent.getCustomPattern().equals(settings.getCustomPattern());
+      modified |= mySettingsComponent.isUtcEnable() != settings.isUtcEnable();
+      return modified;
     }
-    return !mySettingsComponent.getSelectedItem().getValue()
+    boolean modified = !mySettingsComponent.getSelectedItem().getValue()
         .equals(settings.getDefaultLocalFormatter());
+    modified |= mySettingsComponent.isUtcEnable() != settings.isUtcEnable();
+    return modified;
   }
 
   @Override
@@ -58,6 +65,8 @@ public class AppSettingsConfigurable implements Configurable {
       settings.setCustomPatternEnable(false);
       settings.setDateFormatSettings(selected);
     }
+    settings.setUtcEnable(mySettingsComponent.isUtcEnable());
+    LOG.debug("apply settings = " + settings);
   }
 
   @Override
@@ -74,6 +83,7 @@ public class AppSettingsConfigurable implements Configurable {
       mySettingsComponent.setSelectedItem(savedState);
       mySettingsComponent.enableDefaultFormat(true);
     }
+    mySettingsComponent.setUtcEnable(settings.isUtcEnable());
   }
 
   @Override

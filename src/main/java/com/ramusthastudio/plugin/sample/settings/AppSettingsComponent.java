@@ -8,7 +8,6 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.UIUtil;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +15,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,11 +27,18 @@ public class AppSettingsComponent implements ActionListener {
   private final JBTextField customPatternTextField = new JBTextField("dd MMM yyyy HH:mm:ss", 25);
   private final JButton previewButton = new JButton("Preview");
   private final JBCheckBox customPatternCheckBox = new JBCheckBox("Custom format: ");
+  private final JBCheckBox utcCheckBox = new JBCheckBox("UTC");
   private final JBLabel previewLabel = new JBLabel();
   private boolean alreadyPreview;
   private boolean isInvalid;
 
   public AppSettingsComponent() {
+    Box patternBox = Box.createHorizontalBox();
+    patternBox.add(patternComboBox);
+    patternBox.add(utcCheckBox);
+    final JPanel patternPanel = new JPanel(new BorderLayout());
+    patternPanel.add(patternBox, BorderLayout.NORTH);
+
     Box previewBox = Box.createHorizontalBox();
     previewBox.add(previewButton);
     previewBox.add(Box.createHorizontalStrut(5));
@@ -42,7 +47,7 @@ public class AppSettingsComponent implements ActionListener {
     previewPanel.add(previewBox, BorderLayout.NORTH);
 
     mainPanel = FormBuilder.createFormBuilder()
-        .addLabeledComponent(new JBLabel("Date format: "), patternComboBox, 1)
+        .addLabeledComponent(new JBLabel("Date format: "), patternPanel, 1)
         .addSeparator(1)
         .addLabeledComponent(customPatternCheckBox, customPatternTextField, 1)
         .addComponentToRightColumn(previewPanel, 1)
@@ -64,8 +69,12 @@ public class AppSettingsComponent implements ActionListener {
     if (e.getSource() instanceof JButton) {
       try {
         String customPattern = customPatternTextField.getText();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(customPattern)
-            .withZone(ZoneId.systemDefault());
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(customPattern);
+        if (isUtcEnable()) {
+          dateTimeFormatter = dateTimeFormatter.withZone(ZoneId.of("UTC"));
+        } else {
+          dateTimeFormatter = dateTimeFormatter.withZone(ZoneId.systemDefault());
+        }
         previewLabel.setText(dateTimeFormatter.format(ZonedDateTime.now()));
         previewLabel.setForeground(JBColor.foreground());
         isInvalid = false;
@@ -124,5 +133,13 @@ public class AppSettingsComponent implements ActionListener {
 
   public boolean isInvalid() {
     return isInvalid;
+  }
+
+  public boolean isUtcEnable() {
+    return utcCheckBox.isSelected();
+  }
+
+  public void setUtcEnable(boolean selected) {
+    utcCheckBox.setSelected(selected);
   }
 }

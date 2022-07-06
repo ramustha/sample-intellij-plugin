@@ -27,11 +27,9 @@ public class UnixEpochAction extends AnAction {
 
     if (NumberUtils.isDigits(selectedText)) {
       Instant instant = createInstantFormat(selectedText);
-      String localFormat = String.format("%s = %s",
-          selectedText,
+      String localFormat = String.format("%s",
           appSettingsState.getDefaultLocalFormatter().format(instant));
-      String utcFormat = String.format("%s = %s [UTC]",
-          selectedText,
+      String utcFormat = String.format("%s [UTC]",
           appSettingsState.getDefaultUtcFormatter().format(instant));
       String message = String.format("%s%n%s", utcFormat, localFormat);
 

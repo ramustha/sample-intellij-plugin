@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import static com.ramusthastudio.plugin.sample.inspections.TimeMillisSplitter.SECONDS_LENGTH;
@@ -121,8 +122,6 @@ public class UnixEpochInspection extends LocalInspectionTool {
             InjectedLanguageManager.FRANKENSTEIN_INJECTION))) {
           return;
         }
-
-        LOG.debug("element = " + element.getClass() + " " + element.getLanguage());
 
         final Language language = element.getLanguage();
         tokenize(element,
@@ -221,9 +220,8 @@ public class UnixEpochInspection extends LocalInspectionTool {
       }
 
       Instant instant = createInstantFormat(word);
-      String localFormat = String.format("%s = %s",
-          word,
-          appSettingsState.getDefaultLocalFormatter().format(instant));
+      DateTimeFormatter formatter = appSettingsState.getDefaultLocalFormatter();
+      String localFormat = String.format("%s", formatter.format(instant));
       if (myHolder.isOnTheFly()) {
         addRegularDescriptor(myElement, range, myHolder, myUseRename, localFormat);
       } else {

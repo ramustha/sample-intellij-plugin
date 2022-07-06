@@ -16,6 +16,7 @@ public class AppSettingsState implements PersistentStateComponent<AppSettingsSta
 
   private DateFormatSettings dateFormatSettings = DateFormatSettings.RFC_1123_DATE_TIME;
   private boolean isCustomPatternEnable;
+  private boolean isUtcEnable;
   private String customPattern = null;
 
   public static AppSettingsState getInstance() {
@@ -36,12 +37,18 @@ public class AppSettingsState implements PersistentStateComponent<AppSettingsSta
   public DateTimeFormatter getDefaultLocalFormatter() {
     try {
       if (isCustomPatternEnable) {
+        if (isUtcEnable) {
+          return DateTimeFormatter.ofPattern(customPattern).withZone(ZoneId.of("UTC"));
+        }
         return DateTimeFormatter.ofPattern(customPattern).withZone(ZoneId.systemDefault());
       }
-      return dateFormatSettings.getValue().withZone(ZoneId.systemDefault());
     } catch (Exception e) {
-      return dateFormatSettings.getValue().withZone(ZoneId.systemDefault());
+      // ignored
     }
+    if (isUtcEnable) {
+      return dateFormatSettings.getValue().withZone(ZoneId.of("UTC"));
+    }
+    return dateFormatSettings.getValue().withZone(ZoneId.systemDefault());
   }
 
   public DateTimeFormatter getDefaultUtcFormatter() {
@@ -49,10 +56,10 @@ public class AppSettingsState implements PersistentStateComponent<AppSettingsSta
       if (isCustomPatternEnable) {
         return DateTimeFormatter.ofPattern(customPattern).withZone(ZoneId.of("UTC"));
       }
-      return dateFormatSettings.getValue().withZone(ZoneId.of("UTC"));
     } catch (Exception e) {
-      return dateFormatSettings.getValue().withZone(ZoneId.of("UTC"));
+      // ignored
     }
+    return dateFormatSettings.getValue().withZone(ZoneId.of("UTC"));
   }
 
   public DateFormatSettings getDateFormatSettings() {
@@ -77,5 +84,20 @@ public class AppSettingsState implements PersistentStateComponent<AppSettingsSta
 
   public boolean isCustomPatternEnable() {
     return isCustomPatternEnable;
+  }
+
+  public boolean isUtcEnable() {
+    return isUtcEnable;
+  }
+
+  public void setUtcEnable(boolean utcEnable) {
+    isUtcEnable = utcEnable;
+  }
+
+  @Override
+  public String toString() {
+    return "AppSettingsState{" + "dateFormatSettings=" + dateFormatSettings
+        + ", isCustomPatternEnable=" + isCustomPatternEnable + ", isUtcEnable=" + isUtcEnable
+        + ", customPattern='" + customPattern + '\'' + '}';
   }
 }
