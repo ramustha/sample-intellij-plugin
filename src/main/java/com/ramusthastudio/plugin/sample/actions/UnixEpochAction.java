@@ -3,9 +3,11 @@ package com.ramusthastudio.plugin.sample.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.ramusthastudio.plugin.sample.settings.AppSettingsState;
 import org.apache.commons.lang.math.NumberUtils;
@@ -20,7 +22,16 @@ public class UnixEpochAction extends AnAction {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    final Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
+    final Project project = e.getProject();
+    if (null == project || !project.isInitialized() || project.isDisposed()) {
+      return;
+    }
+
+    DataKey<Editor> dataKey = CommonDataKeys.EDITOR;
+    if (dataKey == null) {
+      return;
+    }
+    final Editor editor = e.getRequiredData(dataKey);
     final CaretModel caretModel = editor.getCaretModel();
     final Caret primaryCaret = caretModel.getPrimaryCaret();
     String selectedText = primaryCaret.getSelectedText();

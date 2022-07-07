@@ -14,15 +14,16 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Visualize the unix epoch time format to human-readable date format.<br>
-    <em>Support *.java *.kt *.txt *.json *.xml *.html *.html file type</em>
-  ]]></description>
+        Visualize the unix epoch time format to human-readable date format.<br>
+        ]]></description>
     <change-notes>
         <![CDATA[
-      <ul>
-        <li><b>1.0.0</b> Release 2022.3.</li>
-      </ul>
-    ]]>
+        <p>1.0</p>
+        <ul>
+            <li>Support *.java *.kt *.txt *.json *.xml *.html *.html file type</li>
+            <li>Support custom pattern</li>
+        </ul>
+        ]]>
     </change-notes>
 
     <!-- Product and plugin compatibility requirements.
@@ -78,6 +79,7 @@
                 description="Visualize the unix epoch time format to human-readable date format">
             <keyboard-shortcut keymap="$default" first-keystroke="control alt D"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>
